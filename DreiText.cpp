@@ -4,17 +4,18 @@
 #include <vector>
 #include <fstream>
 
-#define PARTSIZE 1200
+unsigned int partsize = 900;
 
 std::vector<char> vec;
 Gtk::TextView* text1 = 0;
 Gtk::TextView* text2 = 0;
 Gtk::TextView* text3 = 0;
-char * textstr1 = new char[PARTSIZE];
-char * textstr2 = new char[PARTSIZE];
-char * textstr3 = new char[PARTSIZE];
+char * textstr1 = new char[partsize];
+char * textstr2 = new char[partsize];
+char * textstr3 = new char[partsize];
 Gtk::Scale * scroller = 0;
 
+std::string title = "DreiText: ";
 
 const gchar ui[] =
 "<interface> \
@@ -27,7 +28,6 @@ const gchar ui[] =
   <object class='GtkWindow' id='main_window'> \
     <property name='visible'>True</property> \
     <property name='can_focus'>False</property> \
-    <property name='title' translatable='yes'>DreiText</property> \
     <property name='default_width'>500</property> \
     <property name='default_height'>400</property> \
     <child> \
@@ -49,11 +49,11 @@ const gchar ui[] =
                   <object class='GtkTextView' id='text1'> \
                     <property name='visible'>True</property> \
                     <property name='can_focus'>True</property> \
-                    <property name='editable'>False</property> \
+                    <property name='editable'>True</property> \
                     <property name='wrap_mode'>char</property> \
-                    <property name='left_margin'>5</property> \
+                    <property name='left_margin'>15</property> \
                     <property name='right_margin'>5</property> \
-                    <property name='top_margin'>5</property> \
+                    <property name='top_margin'>10</property> \
                     <property name='bottom_margin'>5</property> \
                   </object> \
                 </child> \
@@ -68,16 +68,15 @@ const gchar ui[] =
               <object class='GtkScrolledWindow'> \
                 <property name='visible'>True</property> \
                 <property name='can_focus'>True</property> \
-                <property name='shadow_type'>in</property> \
                 <child> \
                   <object class='GtkTextView' id='text2'> \
                     <property name='visible'>True</property> \
                     <property name='can_focus'>True</property> \
-                    <property name='editable'>False</property> \
+                    <property name='editable'>True</property> \
                     <property name='wrap_mode'>char</property> \
                     <property name='left_margin'>5</property> \
                     <property name='right_margin'>5</property> \
-                    <property name='top_margin'>5</property> \
+                    <property name='top_margin'>10</property> \
                     <property name='bottom_margin'>5</property> \
                   </object> \
                 </child> \
@@ -96,11 +95,11 @@ const gchar ui[] =
                   <object class='GtkTextView' id='text3'> \
                     <property name='visible'>True</property> \
                     <property name='can_focus'>True</property> \
-                    <property name='editable'>False</property> \
+                    <property name='editable'>True</property> \
                     <property name='wrap_mode'>char</property> \
                     <property name='left_margin'>5</property> \
-                    <property name='right_margin'>5</property> \
-                    <property name='top_margin'>5</property> \
+                    <property name='right_margin'>15</property> \
+                    <property name='top_margin'>10</property> \
                     <property name='bottom_margin'>5</property> \
                   </object> \
                 </child> \
@@ -144,7 +143,7 @@ const gchar ui[] =
 </interface> ";
 
 void subs(char * retval, std::vector<char> v, unsigned int from) {
-	for (unsigned int i=0; i<PARTSIZE; i++) {
+	for (unsigned int i=0; i<partsize; i++) {
 		if ((i+from) < v.size()) {
 			retval[i] = v[i+from];
 		} else {
@@ -155,13 +154,13 @@ void subs(char * retval, std::vector<char> v, unsigned int from) {
 
 void scrolling() {
 	long val = scroller->get_value();
-	val = (long) ( (double) vec.size() * (double) val/1000.0);
+	val = ((double) vec.size()) * ((double) val)/1000.0;
 	
 	subs(textstr1, vec, val);
 	text1->get_buffer()->set_text(textstr1);
-	subs(textstr2, vec, val + PARTSIZE);
+	subs(textstr2, vec, val + partsize);
 	text2->get_buffer()->set_text(textstr2);
-	subs(textstr3, vec, val + 2*PARTSIZE);
+	subs(textstr3, vec, val + 2*partsize);
 	text3->get_buffer()->set_text(textstr3);
 }
 
@@ -200,6 +199,8 @@ int main (int argc, char *argv[]) {
 		vec.insert(vec.end(), buffer, buffer + file.gcount());
 	}
 	file.close();
+	main_win->set_title(title+filename);
+	main_win->maximize();
 
 	scrolling();
 	scroller->signal_value_changed().connect(
